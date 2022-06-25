@@ -1,7 +1,6 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 import { Signer } from "ethers";
-import { MyNFT } from "../typechain";
 
 describe("Permission test 1", function () {
   it("Should add permissions", async function () {
@@ -39,7 +38,7 @@ describe("Permission test 1", function () {
       permissionStruct
     );
     const messageHashBinary = ethers.utils.arrayify(messageHash);
-    const messageSignature = await walletOwner.signMessage(messageHashBinary!!);
+    const messageSignature = await walletOwner.signMessage(messageHashBinary);
 
     const callStruct = {
       to: nftContract.address,
