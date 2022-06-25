@@ -32,6 +32,10 @@ describe("Permission test 1", function () {
     const permissionStruct = {
       predicate: predicateContract.address,
       caller: thirdParty.address,
+      predicateParams : {
+        allowedAddress : ,
+        allowedMethod :
+      }
     };
     const messageHash = await walletContract.getPermissionHash(
       permissionStruct

@@ -18,7 +18,7 @@ contract OnChainWallet is Ownable {
   struct Permission {
     address caller;
     Predicate predicate;
-    //    bytes predicateParams;
+    bytes predicateParams;
   }
 
   function execute(Call memory call,
@@ -32,11 +32,11 @@ contract OnChainWallet is Ownable {
     require(permission.caller == msg.sender, "Wrong transaction sender");
 
     //3. Check that Predicate(transaction)=true => we trust transaction
-    //        permission.predicate.check(call, permission.predicateParams);
-    //        permission.predicate.check(call, call.data);
+    permission.predicate.check(call, permission.predicateParams);
+    permission.predicate.check(call, call.data);
 
     //4. Execute trusted transaction
-    //    _execute(call);
+    _execute(call);
   }
 
   function _execute(Call memory call) private returns (bytes memory) {
