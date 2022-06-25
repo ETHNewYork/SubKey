@@ -15,7 +15,7 @@ contract ZeroGasRoleModule is Module {
 
   function execute(OnChainWallet.Call memory call,
     OnChainWallet.Permission memory permission,
-    OnChainWallet.Signature memory permissionSignature
+    bytes memory permissionSignature
   ) public {
     //1. Check that owner has approved this call
     //    checkSignatures(call, permission, permissionSignature);
