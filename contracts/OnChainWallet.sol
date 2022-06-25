@@ -39,6 +39,19 @@ contract OnChainWallet is Ownable {
     require(permission.predicate.isValid(call));
 
     //4. Execute
+    execute(call);
+  }
+
+  function execute(Call memory call) public returns (bytes memory) {
+    (bool success, bytes memory result) = call.to.call(call.data);
+    if (!success) {
+      if (result.length < 68) revert();
+      assembly {
+        result := add(result, 0x04)
+      }
+      revert(abi.decode(result, (string)));
+    }
+    return result;
   }
 
   function getHash(Permission memory permission) public pure returns (bytes32){
