@@ -1,8 +1,8 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 
-describe("Permission test 1", function () {
-  it("Should add permissions", async function () {
+describe("Permissioned wallet", function () {
+  it("Create wallet, grant permission, submit transaction", async function () {
     const [walletOwner, thirdParty, nftReceiver] = await ethers.getSigners();
 
     const walletFactory = await ethers.getContractFactory("OnChainWallet");
@@ -32,10 +32,10 @@ describe("Permission test 1", function () {
     const permissionStruct = {
       predicate: predicateContract.address,
       caller: thirdParty.address,
-      predicateParams : {
-        allowedAddress : ,
-        allowedMethod :
-      }
+      // predicateParams : {
+      //   allowedAddress : ,
+      //   allowedMethod :
+      // }
     };
     const messageHash = await walletContract.getPermissionHash(
       permissionStruct
