@@ -39,10 +39,10 @@ contract OnChainWallet is Ownable {
     require(permission.predicate.isValid(call));
 
     //4. Execute
-    execute(call);
+    _execute(call);
   }
 
-  function execute(Call memory call) public returns (bytes memory) {
+  function _execute(Call memory call) private returns (bytes memory) {
     (bool success, bytes memory result) = call.to.call(call.data);
     if (!success) {
       if (result.length < 68) revert();
@@ -54,7 +54,7 @@ contract OnChainWallet is Ownable {
     return result;
   }
 
-  function getHash(Permission memory permission) public pure returns (bytes32){
+  function getHash(Permission memory permission) public returns (bytes32){
     return keccak256(
       abi.encode(
         permission
