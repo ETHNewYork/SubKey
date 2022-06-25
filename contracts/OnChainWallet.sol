@@ -54,7 +54,7 @@ contract OnChainWallet is Ownable {
   function checkSignatureValid(address signer, bytes32 hash, bytes memory signature) internal pure {
     bytes32 etherHash = getHashEthereum(bytes32ToString(hash));
     (address recovered, ECDSA.RecoverError error) = ECDSA.tryRecover(etherHash, signature);
-    require(signer == recovered, "owner()==recovered");
+    require(signer == recovered, "Invalid signature");
   }
 
   function getPermissionHash(Permission memory permission) public pure returns (bytes32){
