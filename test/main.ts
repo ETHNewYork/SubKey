@@ -9,8 +9,8 @@ describe("Permissioned wallet", function () {
     const walletContract = await walletFactory.connect(walletOwner).deploy();
     await walletContract.deployed();
 
-    const nftFactory = await ethers.getContractFactory("MyNFT");
-    const nftContract = await nftFactory.connect(walletOwner).deploy("ipfs://");
+    const nftFactory = await ethers.getContractFactory("TestNFT");
+    const nftContract = await nftFactory.connect(walletOwner).deploy();
     await nftContract.deployed();
 
     const predicateFactory = await ethers.getContractFactory("PredicateImplV1");

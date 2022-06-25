@@ -5,15 +5,15 @@ import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
 
-contract MyNFT is ERC721, Ownable {
+contract TestNFT is ERC721, Ownable {
 
   using Strings for uint256;
 
   string baseURI;
   string public baseExtension = ".json";
 
-  constructor(string memory _initBaseURI) ERC721("NFT Name", "NFT_SYMBOL") {
-    setBaseURI(_initBaseURI);
+  constructor() ERC721("NFT Name", "NFT_SYMBOL") {
+    setBaseURI("ipfs://");
   }
 
   function safeMint(address to, uint256 tokenId) public onlyOwner {
