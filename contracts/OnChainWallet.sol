@@ -14,8 +14,9 @@ contract OnChainWallet is Ownable {
   }
 
   struct Permission {
-    Predicate predicate;
     address caller;
+    Predicate predicate;
+    bytes predicateParams;
   }
 
   struct Signature {
@@ -29,16 +30,16 @@ contract OnChainWallet is Ownable {
     Permission memory permission, // created by owner
     Signature memory permissionSignature // created by owner
   ) public {
-    //1. Check that Artefact was signed by Master-key => we trust Artefact data
+    //1. Check that Permission was signed by the owner => we trust the Permission data
     checkSignatureValid(owner(), hashPermissions(permission), permissionSignature);
 
-    //2. Check that caller is the same as approved by artefact
-    require(permission.caller == msg.sender, "Wrong message sender");
+    //2. Check that caller is the same as approved by the Permission
+    require(permission.caller == msg.sender, "Wrong transaction sender");
 
     //3. Check that Predicate(transaction)=true => we trust transaction
-    require(permission.predicate.isValid(call));
+    require(permission.predicate.isValid(call, permission.predicateParams), "Unpermitted operation");
 
-    //4. Execute
+    //4. Execute trusted transaction
     _execute(call);
   }
 

@@ -7,5 +7,5 @@ import "./OnChainWallet.sol";
 
 interface Predicate {
 
-    function isValid(OnChainWallet.Call memory call) external returns (bool);
+  function isValid(OnChainWallet.Call memory call, bytes memory predicateParams) external returns (bool);
 }
