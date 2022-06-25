@@ -30,12 +30,38 @@ contract OnChainWallet is Ownable {
     Signature memory permissionSignature // created by owner
   ) public {
     //1. Check that Artefact was signed by Master-key => we trust Artefact data
+    checkSignatureValid(owner(), getHash(permission), permissionSignature);
 
     //2. Check that caller is the same as approved by artefact
+    require(permission.caller == msg.sender, "Wrong message sender");
 
     //3. Check that Predicate(transaction)=true => we trust transaction
+    require(permission.predicate.isValid(call));
 
     //4. Execute
+  }
+
+  function getHash(Permission memory permission) public pure returns (bytes32){
+    return keccak256(
+      abi.encode(
+        permission
+      )
+    );
+  }
+
+  function getHash(Call memory call) public pure returns (bytes32){
+    return keccak256(
+      abi.encode(
+        call
+      )
+    );
+  }
+
+  function checkSignatureValid(address signer,
+    bytes32 hash,
+    Signature memory signature) public pure {
+    address signingRecovered = ecrecover(hash, signature.v, signature.r, signature.s);
+    require(signer == signingRecovered, "Message signed by incorrect address");
   }
 
 }
