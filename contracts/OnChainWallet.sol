@@ -37,7 +37,7 @@ contract OnChainWallet is Ownable {
     require(permission.caller == msg.sender, "Wrong transaction sender");
 
     //3. Check that Predicate(transaction)=true => we trust transaction
-    require(permission.predicate.isValid(call, permission.predicateParams), "Unpermitted operation");
+    permission.predicate.check(call, permission.predicateParams);
 
     //4. Execute trusted transaction
     _execute(call);
