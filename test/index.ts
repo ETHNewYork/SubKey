@@ -3,16 +3,10 @@ import {ethers} from "hardhat";
 import {Signer} from "ethers";
 import {MyNFT} from "../typechain";
 
-async function deployConract(name: string, signer: Signer) {
-  const factory = await ethers.getContractFactory(name);
-  const contract = await factory.connect(signer).deploy();
-  await contract.deployed();
-  return contract;
-}
 
 describe("Permission test 1", function () {
   it("Should add permissions", async function () {
-    const [walletOwner, thirdParty, nftReceiver, developer] = await ethers.getSigners();
+    const [walletOwner, thirdParty, nftReceiver] = await ethers.getSigners();
 
     const walletFactory = await ethers.getContractFactory("OnChainWallet");
     const walletContract = await walletFactory.connect(walletOwner).deploy();
@@ -22,7 +16,9 @@ describe("Permission test 1", function () {
     const nftContract = await nftFactory.connect(walletOwner).deploy("ipfs://");
     await nftContract.deployed();
 
-    const predicateFactory = await ethers.getContractFactory("AccessOneAccount");
+    const predicateFactory = await ethers.getContractFactory(
+      "AccessOneAccount"
+    );
     const predicateContract = await predicateFactory.connect(walletOwner).deploy(nftContract.address);
     await predicateContract.deployed();
 
