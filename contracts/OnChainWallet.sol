@@ -26,7 +26,6 @@ contract OnChainWallet is Ownable {
   }
 
   function execute(Call memory call,
-    Signature memory callSignature,
     Permission memory permission, // created by owner
     Signature memory permissionSignature // created by owner
   ) public {
