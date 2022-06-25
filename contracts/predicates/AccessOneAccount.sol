@@ -1,5 +1,5 @@
 //SPDX-License-Identifier: Unlicense
-pragma solidity =0.7.6;
+pragma solidity ^0.8.4;
 pragma abicoder v2;
 
 import "hardhat/console.sol";
@@ -12,7 +12,7 @@ contract AccessOneAccount is Predicate {
         allowedAddress = _allowedAddress;
     }
 
-    function isValid(OnChainWallet.Call memory call) override external returns (bool){
+    function isValid(OnChainWallet.Call memory call) override external view returns (bool){
         return call.to == allowedAddress;
     }
 }
