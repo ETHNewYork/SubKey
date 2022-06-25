@@ -25,12 +25,12 @@ contract OnChainWallet is Ownable {
   }
 
   function execute(Call memory call,
-    bytes memory callSignature,
+    Signature memory callSignature,
     Permission memory permission, // created by owner
     Signature memory permissionSignature // created by owner
   ) public {
     //1. Check that Artefact was signed by Master-key => we trust Artefact data
-    checkSignatureValid(owner(), getHash(permission), permissionSignature);
+    checkSignatureValid(owner(), hashPermissions(permission), permissionSignature);
 
     //2. Check that caller is the same as approved by artefact
     require(permission.caller == msg.sender, "Wrong message sender");
@@ -54,7 +54,7 @@ contract OnChainWallet is Ownable {
     return result;
   }
 
-  function getHash(Permission memory permission) public returns (bytes32){
+  function hashPermissions(Permission memory permission) public pure returns (bytes32){
     return keccak256(
       abi.encode(
         permission
@@ -62,7 +62,7 @@ contract OnChainWallet is Ownable {
     );
   }
 
-  function getHash(Call memory call) public pure returns (bytes32){
+  function hashCall(Call memory call) public pure returns (bytes32){
     return keccak256(
       abi.encode(
         call

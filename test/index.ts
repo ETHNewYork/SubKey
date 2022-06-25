@@ -12,7 +12,7 @@ async function deployConract(name: string, signer: Signer) {
 
 describe("Permission test 1", function () {
   it("Should add permissions", async function () {
-    const [walletOwner, thirdParty, nftReceiver] = await ethers.getSigners();
+    const [walletOwner, thirdParty, nftReceiver, developer] = await ethers.getSigners();
 
     const walletFactory = await ethers.getContractFactory("OnChainWallet");
     const walletContract = await walletFactory.connect(walletOwner).deploy();
@@ -22,6 +22,10 @@ describe("Permission test 1", function () {
     const nftContract = await nftFactory.connect(walletOwner).deploy("ipfs://");
     await nftContract.deployed();
 
+    const predicateFactory = await ethers.getContractFactory("AccessOneAccount");
+    const predicateContract = await predicateFactory.connect(walletOwner).deploy(nftContract.address);
+    await predicateContract.deployed();
+
     nftContract.connect(walletOwner).transferOwnership(walletContract.address);
 
     const abi = [
@@ -29,14 +33,35 @@ describe("Permission test 1", function () {
     ];
     const iface = new ethers.utils.Interface(abi);
 
-    const data = iface.encodeFunctionData("safeMint", [nftReceiver, 1]);
+    const mintCallData = iface.encodeFunctionData("safeMint", [nftReceiver, 1]);
 
-    const callStruct = walletContract.getHash(nftContract.address, data);
-    const callSignature = ethers.utils.splitSignature(
-      await walletOwner.signMessage(ethers.utils.arrayify(callStruct))
+    const permissionStruct = {
+      predicate: predicateContract.address,
+      caller: thirdParty.address,
+    };
+    const hashedPermissions = await walletContract.hashPermissions(
+      permissionStruct
     );
-    walletContract.connect(thirdParty).execute(callStruct)
+    const permissionSignature = ethers.utils.splitSignature(
+      await walletOwner.signMessage(hashedPermissions)
+    );
 
+    const callStruct = {
+      to: nftContract.address,
+      data: mintCallData,
+    };
+    const hashedCall = await walletContract.hashCall(callStruct);
+    const callSignature = ethers.utils.splitSignature(
+      await thirdParty.signMessage(hashedCall)
+    );
+    walletContract
+      .connect(thirdParty)
+      .execute(
+        callStruct,
+        callSignature,
+        permissionStruct,
+        permissionSignature
+      );
 
     // expect(await greeter.greet()).to.equal("Hello, world!");
     //
