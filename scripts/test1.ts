@@ -22,14 +22,11 @@ async function main() {
   await predicateContract.deployed();
 
   nftContract.connect(walletOwner).transferOwnership(walletContract.address);
-
   const abi = [
     "function safeMint(address to, uint256 tokenId)"
   ];
   const iface = new ethers.utils.Interface(abi);
-
-  const mintCallData = iface.encodeFunctionData("safeMint", [nftReceiver, 1]);
-
+  const mintCallData = iface.encodeFunctionData("safeMint", [nftReceiver.address, 1]);
   const permissionStruct = {
     predicate: predicateContract.address,
     caller: thirdParty.address,

@@ -24,20 +24,21 @@ describe("Permission test 1", function () {
 
     nftContract.connect(walletOwner).transferOwnership(walletContract.address);
 
-    const abi = [
-      "function safeMint(address to, uint256 tokenId)"
-    ];
+    const abi = ["function safeMint(address to, uint256 tokenId)"];
     const iface = new ethers.utils.Interface(abi);
 
-    const mintCallData = iface.encodeFunctionData("safeMint", [nftReceiver, 1]);
+    const mintCallData = iface.encodeFunctionData("safeMint", [
+      nftReceiver.address,
+      1,
+    ]);
 
     const permissionStruct = {
       predicate: predicateContract.address,
       caller: thirdParty.address,
     };
-    const hashedPermissions = await walletContract.hashPermissions(
-      permissionStruct
-    );
+    const hashedPermissions = await walletContract
+      .connect(walletOwner)
+      .hashPermissions(permissionStruct);
     const permissionSignature = ethers.utils.splitSignature(
       await walletOwner.signMessage(hashedPermissions)
     );
@@ -46,11 +47,11 @@ describe("Permission test 1", function () {
       to: nftContract.address,
       data: mintCallData,
     };
-    const hashedCall = await walletContract.hashCall(callStruct);
+    const hashedCall = await walletContract.connect(walletOwner).hashCall(callStruct);
     const callSignature = ethers.utils.splitSignature(
       await thirdParty.signMessage(hashedCall)
     );
-    walletContract
+    const t = walletContract
       .connect(thirdParty)
       .execute(
         callStruct,
@@ -59,6 +60,7 @@ describe("Permission test 1", function () {
         permissionSignature
       );
 
+    await t;
     // expect(await greeter.greet()).to.equal("Hello, world!");
     //
     // const setGreetingTx = await greeter.setGreeting("Hola, mundo!");
