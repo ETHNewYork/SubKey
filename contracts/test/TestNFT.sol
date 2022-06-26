@@ -9,7 +9,7 @@ contract TestNFT is ERC721, Ownable {
 
   using Strings for uint256;
 
-  string baseURI;
+  string public baseURI;
   string public baseExtension = ".json";
 
   constructor() ERC721("NFT Name", "NFT_SYMBOL") {
