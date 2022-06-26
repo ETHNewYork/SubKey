@@ -81,19 +81,9 @@ describe("Subkeys", function () {
   it("Transaction to not allowed method fails", async function () {
     const [walletOwner, thirdParty] = await ethers.getSigners();
 
-    const walletFactory = await ethers.getContractFactory("OnChainWallet");
-    const walletContract = await walletFactory.connect(walletOwner).deploy();
-    await walletContract.deployed();
-
-    const nftFactory = await ethers.getContractFactory("TestNFT");
-    const nftContract = await nftFactory.connect(walletOwner).deploy();
-    await nftContract.deployed();
-
-    const predicateFactory = await ethers.getContractFactory("PredicateImplV1");
-    const predicateContract = await predicateFactory
-      .connect(walletOwner)
-      .deploy();
-    await predicateContract.deployed();
+    const walletContract = await deployWallet(walletOwner);
+    const nftContract = await deployNftContract(walletOwner);
+    const predicateContract = await deployPredicate(walletOwner);
 
     nftContract.connect(walletOwner).transferOwnership(walletContract.address);
 
