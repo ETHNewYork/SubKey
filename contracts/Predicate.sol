@@ -3,11 +3,11 @@ pragma solidity ^0.8.4;
 pragma abicoder v2;
 
 import "hardhat/console.sol";
-import "./OnChainWallet.sol";
+import "./SubKey.sol";
 
 interface Predicate {
 
-  function check(OnChainWallet.Call memory call, bytes memory predicateParams) external;
+  function check(SubKey.Call memory call, bytes memory predicateParams) external;
 }
 
 contract PredicateImplV1 is Predicate {
@@ -16,7 +16,7 @@ contract PredicateImplV1 is Predicate {
     bytes4 allowedMethod;
   }
 
-  function check(OnChainWallet.Call memory call, bytes memory predicateParams) override external pure {
+  function check(SubKey.Call memory call, bytes memory predicateParams) override external pure {
     (PredicateData memory _predicateData) = abi.decode(predicateParams, (PredicateData));
     if (_predicateData.allowedAddress != address(0)) {
       require(_predicateData.allowedAddress == call.to, "Target address is not allowed");

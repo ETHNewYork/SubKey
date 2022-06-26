@@ -1,7 +1,7 @@
 import { ethers } from "hardhat";
 
 async function main() {
-  const contractName = "OnChainWallet";
+  const contractName = "SubKey";
   const factory = await ethers.getContractFactory(contractName);
   const contract = await factory.deploy();
 

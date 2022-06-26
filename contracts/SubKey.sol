@@ -9,7 +9,7 @@ import "@openzeppelin/contracts/utils/cryptography/SignatureChecker.sol";
 import "./Predicate.sol";
 
 
-contract OnChainWallet is Ownable {
+contract SubKey is Ownable {
 
   struct Call {
     address to;

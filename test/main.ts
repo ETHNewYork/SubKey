@@ -1,7 +1,7 @@
 import {expect} from "chai";
 import {ethers} from "hardhat";
 import {SignerWithAddress} from "@nomiclabs/hardhat-ethers/signers";
-import {OnChainWallet, PredicateImplV1, TestNFT} from "../typechain";
+import {SubKey, PredicateImplV1, TestNFT} from "../typechain";
 
 describe("Subkeys", function () {
   let walletOwner: SignerWithAddress,
@@ -9,7 +9,7 @@ describe("Subkeys", function () {
     nftReceiver: SignerWithAddress,
     wrongThirdParty: SignerWithAddress;
 
-  let walletContract: OnChainWallet;
+  let walletContract: SubKey;
   let nftContract: TestNFT;
   let predicateContract: PredicateImplV1;
 
@@ -37,7 +37,7 @@ describe("Subkeys", function () {
   }
 
   async function deployWallet(signer: SignerWithAddress) {
-    const walletFactory = await ethers.getContractFactory("OnChainWallet");
+    const walletFactory = await ethers.getContractFactory("SubKey");
     const walletContract = await walletFactory.connect(signer).deploy();
     await walletContract.deployed();
     return walletContract;

@@ -1,7 +1,7 @@
 pragma solidity ^0.8.4;
 
 import "@gnosis.pm/zodiac/contracts/core/Module.sol";
-import "../OnChainWallet.sol";
+import "../SubKey.sol";
 
 // 'Zero gas' means that owner does not need to spend gas to assign
 contract ZeroGasRoleModule is Module {
@@ -17,8 +17,8 @@ contract ZeroGasRoleModule is Module {
     );
   }
 
-  function execute(OnChainWallet.Call memory call,
-    OnChainWallet.Permission memory permission,
+  function execute(SubKey.Call memory call,
+    SubKey.Permission memory permission,
     bytes memory permissionSignature
   ) public {
     //1. Check that owner has approved this call
@@ -28,8 +28,8 @@ contract ZeroGasRoleModule is Module {
     exec(call.to, 0, call.data, Enum.Operation.Call);
   }
 
-  function checkSignatures(OnChainWallet.Call memory call,
-    OnChainWallet.Permission memory permission,
+  function checkSignatures(SubKey.Call memory call,
+    SubKey.Permission memory permission,
     bytes memory permissionSignature) public {
 
     // Check predicate validity with library
