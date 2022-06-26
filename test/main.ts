@@ -2,6 +2,7 @@ import {expect} from "chai";
 import {ethers} from "hardhat";
 import {SignerWithAddress} from "@nomiclabs/hardhat-ethers/signers";
 import {PredicateImplV1, SubkeysWallet, TestNFT} from "../typechain";
+import {deployContract} from "./common";
 
 describe("SubkeysWallet", function () {
   let walletOwner: SignerWithAddress,
@@ -17,9 +18,9 @@ describe("SubkeysWallet", function () {
     [walletOwner, thirdParty, nftReceiver, wrongThirdParty] =
       await ethers.getSigners();
 
-    walletContract = await deployWallet(walletOwner);
-    nftContract = await deployNftContract(walletOwner);
-    predicateContract = await deployPredicate(walletOwner);
+    walletContract = await deployContract(walletOwner, "SubkeysWallet");
+    nftContract = await deployContract(walletOwner, "TestNFT");
+    predicateContract = await deployContract(walletOwner, "PredicateImplV1");
 
     nftContract.connect(walletOwner).transferOwnership(walletContract.address);
   });
@@ -89,27 +90,6 @@ describe("SubkeysWallet", function () {
 
     expect(t).to.revertedWith("Method is not allowed");
   });
-
-  async function deployPredicate(signer: SignerWithAddress) {
-    const predicateFactory = await ethers.getContractFactory("PredicateImplV1");
-    const predicateContract = await predicateFactory.connect(signer).deploy();
-    await predicateContract.deployed();
-    return predicateContract;
-  }
-
-  async function deployNftContract(signer: SignerWithAddress) {
-    const nftFactory = await ethers.getContractFactory("TestNFT");
-    const nftContract = await nftFactory.connect(signer).deploy();
-    await nftContract.deployed();
-    return nftContract;
-  }
-
-  async function deployWallet(signer: SignerWithAddress) {
-    const walletFactory = await ethers.getContractFactory("SubkeysWallet");
-    const walletContract = await walletFactory.connect(signer).deploy();
-    await walletContract.deployed();
-    return walletContract;
-  }
 
   function createMintMethodCallData() {
     const abi = ["function safeMint(address to, uint256 tokenId)"];
