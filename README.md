@@ -1,6 +1,6 @@
-# Permissioned Wallet
+# SubKeys
 
-Permissioned wallet (or Granted Keys) - ability to grant controlled permissions on a contract to a third party.
+# SubKeys - keys issued by main account keys that can only submit transaction allowed by Permissions.
 
 # Deploy
 

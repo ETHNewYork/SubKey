@@ -1,8 +1,8 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 
-describe("Permissioned wallet", function () {
-  it("Create wallet, grant permission, submit transaction", async function () {
+describe("Subkeys", function () {
+  it("Create wallet and subkeys, grant permission, submit transaction", async function () {
     const [walletOwner, thirdParty, nftReceiver] = await ethers.getSigners();
 
     const walletFactory = await ethers.getContractFactory("OnChainWallet");
