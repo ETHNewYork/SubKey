@@ -1,5 +1,5 @@
-import {expect} from "chai";
-import {ethers} from "hardhat";
+import { expect } from "chai";
+import { ethers } from "hardhat";
 import {
   PredicateImplV1,
   SubkeysWallet,
@@ -7,8 +7,8 @@ import {
   TestNFT,
   ZeroGasRoleModule,
 } from "../typechain";
-import {SignerWithAddress} from "@nomiclabs/hardhat-ethers/signers";
-import {deployContract} from "./common";
+import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
+import { deployContract } from "./common";
 
 describe("Zodiac integration with Permissioned wallet", function () {
   let walletOwner: SignerWithAddress,
@@ -17,8 +17,9 @@ describe("Zodiac integration with Permissioned wallet", function () {
     wrongThirdParty: SignerWithAddress;
 
   let predicateContract: PredicateImplV1;
-  let nftContract: TestNFT;
+  let moduleContract: ZeroGasRoleModule;
   let avatarContract: TestAvatar;
+  let nftContract: TestNFT;
 
   beforeEach(async () => {
     [walletOwner, thirdParty, nftReceiver, wrongThirdParty] =
@@ -27,8 +28,15 @@ describe("Zodiac integration with Permissioned wallet", function () {
     // deploy predicate (one per chain)
     predicateContract = await deployContract(walletOwner, "PredicateImplV1");
 
-    // create avatar
+    // deploy avatar
     avatarContract = await deployContract(walletOwner, "TestAvatar");
+
+    // deploy module and connect with avatar
+    const moduleFactory = await ethers.getContractFactory("ZeroGasRoleModule");
+    moduleContract = await moduleFactory
+      .connect(walletOwner)
+      .deploy(avatarContract.address);
+    await moduleContract.deployed();
 
     // create NFT collection and transfer to avatar
     nftContract = await deployContract(walletOwner, "TestNFT");
@@ -36,22 +44,31 @@ describe("Zodiac integration with Permissioned wallet", function () {
   });
 
   it("should emit event because of successful set up", async () => {
-    const [walletOwner, thirdParty, nftReceiver] = await ethers.getSigners();
+    const [avatarOwner, thirdParty, nftReceiver] = await ethers.getSigners();
 
     // 1. create permission for thirdParty to mint NFT (off chain)
     const permissionToMint = createPermissionToMint(thirdParty.address);
 
     // 2. sign permission with the owner keys (off chain)
-    // const messageSignature = await signPermission(
-    //     walletOwner,
-    //     permissionToMint
-    // );
+    const permissionSignature = await signPermission(
+      avatarOwner,
+      permissionToMint
+    );
 
     // 3. prepare NFT mint call (off chain)
-    // const mintCall = {
-    //   to: nftContract.address,
-    //   data: createMintMethodCallData(),
-    // };
+    const mintCall = {
+      to: nftContract.address,
+      data: createMintMethodCallData(),
+    };
+
+    // 4. send NFT mint call from 3rdparty wallet
+    // on chain
+    await moduleContract
+      .connect(thirdParty)
+      .execute(mintCall, permissionToMint, permissionSignature);
+
+    // 5. confirm a transaction successfully completed
+    expect(await nftContract.ownerOf(1)).to.be.equal(nftReceiver.address);
   });
 
   function createPermissionToMint(address: string) {
@@ -69,16 +86,22 @@ describe("Zodiac integration with Permissioned wallet", function () {
     };
   }
 
-  // async function signPermission(
-  //     signer: SignerWithAddress,
-  //     permission: {
-  //       predicate: string;
-  //       caller: string;
-  //       predicateParams: string;
-  //     }
-  // ) {
-  //   const messageHash = await walletContract.getPermissionHash(permission);
-  //   const messageHashBinary = ethers.utils.arrayify(messageHash);
-  //   return await signer.signMessage(messageHashBinary);
-  // }
+  async function signPermission(
+    signer: SignerWithAddress,
+    permission: {
+      predicate: string;
+      caller: string;
+      predicateParams: string;
+    }
+  ) {
+    const messageHash = await moduleContract.getPermissionHash(permission);
+    const messageHashBinary = ethers.utils.arrayify(messageHash);
+    return await signer.signMessage(messageHashBinary);
+  }
+
+  function createMintMethodCallData() {
+    const abi = ["function safeMint(address to, uint256 tokenId)"];
+    const iface = new ethers.utils.Interface(abi);
+    return iface.encodeFunctionData("safeMint", [nftReceiver.address, 1]);
+  }
 });

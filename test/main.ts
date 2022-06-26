@@ -34,7 +34,7 @@ describe("SubkeysWallet", function () {
     const permissionToMint = createPermissionToMint(thirdParty.address);
 
     // 2. sign permission with the owner keys (off chain)
-    const messageSignature = await signPermission(
+    const permissionSignature = await signPermission(
       walletOwner,
       permissionToMint
     );
@@ -48,7 +48,7 @@ describe("SubkeysWallet", function () {
     // 4. send NFT mint call from 3rdparty wallet (on chain)
     await walletContract
       .connect(thirdParty)
-      .execute(mintCall, permissionToMint, messageSignature);
+      .execute(mintCall, permissionToMint, permissionSignature);
 
     // 5. confirm a transaction successfully completed
     expect(await nftContract.ownerOf(1)).to.be.equal(nftReceiver.address);
@@ -56,7 +56,7 @@ describe("SubkeysWallet", function () {
     // 6. send same request from a different user and confirm transaction fails
     const t = walletContract
       .connect(wrongThirdParty)
-      .execute(mintCall, permissionToMint, messageSignature);
+      .execute(mintCall, permissionToMint, permissionSignature);
     expect(t).to.be.revertedWith("Wrong transaction sender");
   });
 

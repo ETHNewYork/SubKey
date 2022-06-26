@@ -6,7 +6,7 @@ import "../SubkeysWallet.sol";
 // 'Zero gas' means that owner does not need to spend gas to assign
 contract ZeroGasRoleModule is Module {
 
-  constructor(address _avatar){
+  constructor(address _avatar) {
     avatar = _avatar;
   }
 
