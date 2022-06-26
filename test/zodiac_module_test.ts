@@ -11,10 +11,10 @@ import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { deployContract } from "./common";
 
 describe("Zodiac integration with Permissioned wallet", function () {
-  let walletOwner: SignerWithAddress,
+  let avatarAndModuleOwner: SignerWithAddress,
+    developer: SignerWithAddress,
     nftReceiver: SignerWithAddress,
-    thirdParty: SignerWithAddress,
-    wrongThirdParty: SignerWithAddress;
+    thirdParty: SignerWithAddress;
 
   let predicateContract: PredicateImplV1;
   let moduleContract: ZeroGasRoleModule;
@@ -22,36 +22,36 @@ describe("Zodiac integration with Permissioned wallet", function () {
   let nftContract: TestNFT;
 
   beforeEach(async () => {
-    [walletOwner, thirdParty, nftReceiver, wrongThirdParty] =
+    [avatarAndModuleOwner, thirdParty, nftReceiver, developer] =
       await ethers.getSigners();
 
     // deploy predicate (one per chain)
-    predicateContract = await deployContract(walletOwner, "PredicateImplV1");
+    predicateContract = await deployContract(developer, "PredicateImplV1");
 
     // deploy avatar
-    avatarContract = await deployContract(walletOwner, "TestAvatar");
+    avatarContract = await deployContract(avatarAndModuleOwner, "TestAvatar");
 
     // deploy module and connect with avatar
     const moduleFactory = await ethers.getContractFactory("ZeroGasRoleModule");
     moduleContract = await moduleFactory
-      .connect(walletOwner)
+      .connect(avatarAndModuleOwner)
       .deploy(avatarContract.address);
     await moduleContract.deployed();
 
     // create NFT collection and transfer to avatar
-    nftContract = await deployContract(walletOwner, "TestNFT");
-    nftContract.connect(walletOwner).transferOwnership(avatarContract.address);
+    nftContract = await deployContract(avatarAndModuleOwner, "TestNFT");
+    nftContract
+      .connect(avatarAndModuleOwner)
+      .transferOwnership(avatarContract.address);
   });
 
   it("should emit event because of successful set up", async () => {
-    const [avatarOwner, thirdParty, nftReceiver] = await ethers.getSigners();
-
     // 1. create permission for thirdParty to mint NFT (off chain)
     const permissionToMint = createPermissionToMint(thirdParty.address);
 
-    // 2. sign permission with the owner keys (off chain)
+    // 2. sign permission with the avatarAndModuleOwner keys (off chain)
     const permissionSignature = await signPermission(
-      avatarOwner,
+      avatarAndModuleOwner,
       permissionToMint
     );
 
