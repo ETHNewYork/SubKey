@@ -1,23 +1,36 @@
-import {expect} from "chai";
-import {ethers} from "hardhat";
+import { expect } from "chai";
+import { ethers } from "hardhat";
+import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 
 describe("Subkeys", function () {
-  it("Create wallet and subkeys, grant permission, submit transaction", async function () {
-    const [walletOwner, thirdParty, nftReceiver, wrongThirdParty] = await ethers.getSigners();
-
-    const walletFactory = await ethers.getContractFactory("OnChainWallet");
-    const walletContract = await walletFactory.connect(walletOwner).deploy();
-    await walletContract.deployed();
-
-    const nftFactory = await ethers.getContractFactory("TestNFT");
-    const nftContract = await nftFactory.connect(walletOwner).deploy();
-    await nftContract.deployed();
-
+  async function deployPredicate(signer: SignerWithAddress) {
     const predicateFactory = await ethers.getContractFactory("PredicateImplV1");
-    const predicateContract = await predicateFactory
-      .connect(walletOwner)
-      .deploy();
+    const predicateContract = await predicateFactory.connect(signer).deploy();
     await predicateContract.deployed();
+    return predicateContract;
+  }
+
+  async function deployNftContract(signer: SignerWithAddress) {
+    const nftFactory = await ethers.getContractFactory("TestNFT");
+    const nftContract = await nftFactory.connect(signer).deploy();
+    await nftContract.deployed();
+    return nftContract;
+  }
+
+  async function deployWallet(signer: SignerWithAddress) {
+    const walletFactory = await ethers.getContractFactory("OnChainWallet");
+    const walletContract = await walletFactory.connect(signer).deploy();
+    await walletContract.deployed();
+    return walletContract;
+  }
+
+  it("Create wallet and subkeys, grant permission, submit transaction", async function () {
+    const [walletOwner, thirdParty, nftReceiver, wrongThirdParty] =
+      await ethers.getSigners();
+
+    const walletContract = await deployWallet(walletOwner);
+    const nftContract = await deployNftContract(walletOwner);
+    const predicateContract = await deployPredicate(walletOwner);
 
     nftContract.connect(walletOwner).transferOwnership(walletContract.address);
 
@@ -29,11 +42,9 @@ describe("Subkeys", function () {
       1,
     ]);
 
-    const safeMintSignature = iface.getSighash("safeMint");
-
     const predicateParams = {
       allowedAddress: nftContract.address,
-      allowedMethod: safeMintSignature,
+      allowedMethod: iface.getSighash("safeMint"),
     };
     const permissionStruct = {
       predicate: predicateContract.address,
@@ -126,7 +137,5 @@ describe("Subkeys", function () {
       .execute(callStruct, permissionStruct, messageSignature);
 
     expect(t).to.revertedWith("Method is not allowed");
-
   });
-
 });
