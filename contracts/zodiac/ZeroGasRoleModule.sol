@@ -41,7 +41,7 @@ contract ZeroGasRoleModule is Module {
   function getPermissionHash(SubkeysWallet.Permission memory permission) public pure returns (bytes32){
     return keccak256(
       abi.encode(
-        permission.caller // TODO hash from all permission fields
+        permission.caller, permission.predicate, permission.predicateParams
       )
     );
   }
