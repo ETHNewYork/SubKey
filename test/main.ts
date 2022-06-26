@@ -1,5 +1,5 @@
-import { expect } from "chai";
-import { ethers } from "hardhat";
+import {expect} from "chai";
+import {ethers} from "hardhat";
 
 describe("Subkeys", function () {
   it("Create wallet and subkeys, grant permission, submit transaction", async function () {
@@ -29,13 +29,19 @@ describe("Subkeys", function () {
       1,
     ]);
 
+    const safeMintSignature = iface.getSighash("safeMint");
+
+    const predicateParams = {
+      allowedAddress: nftContract.address,
+      allowedMethod: safeMintSignature,
+    };
     const permissionStruct = {
       predicate: predicateContract.address,
       caller: thirdParty.address,
-      // predicateParams : {
-      //   allowedAddress : ,
-      //   allowedMethod :
-      // }
+      predicateParams: ethers.utils.defaultAbiCoder.encode(
+        ["address", "bytes4"],
+        [predicateParams.allowedAddress, predicateParams.allowedMethod]
+      ),
     };
     const messageHash = await walletContract.getPermissionHash(
       permissionStruct
@@ -50,5 +56,9 @@ describe("Subkeys", function () {
     await walletContract
       .connect(thirdParty)
       .execute(callStruct, permissionStruct, messageSignature);
+
+    const nft1Owner = await nftContract.ownerOf(1);
+    expect(nft1Owner).to.be.equal(nftReceiver.address);
+
   });
 });

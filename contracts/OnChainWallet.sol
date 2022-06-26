@@ -33,7 +33,6 @@ contract OnChainWallet is Ownable {
 
     //3. Check that Predicate(transaction)=true => we trust transaction
     permission.predicate.check(call, permission.predicateParams);
-    permission.predicate.check(call, call.data);
 
     //4. Execute trusted transaction
     _execute(call);
@@ -60,7 +59,7 @@ contract OnChainWallet is Ownable {
   function getPermissionHash(Permission memory permission) public pure returns (bytes32){
     return keccak256(
       abi.encode(
-        permission
+        permission.caller
       )
     );
   }

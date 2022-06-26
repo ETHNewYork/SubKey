@@ -19,7 +19,7 @@ contract PredicateImplV1 is Predicate {
   function check(OnChainWallet.Call memory call, bytes memory predicateParams) override external view {
     (PredicateData memory _predicateData) = abi.decode(predicateParams, (PredicateData));
     if (_predicateData.allowedAddress != address(0)) {
-      require(_predicateData.allowedAddress == call.to, "Unallowed account");
+      require(_predicateData.allowedAddress == call.to, "Target address is not allowed");
     }
     if (_predicateData.allowedMethod != bytes4(0x0)) {
       bytes4 methodSignature =
@@ -27,7 +27,7 @@ contract PredicateImplV1 is Predicate {
       (bytes4(call.data[1]) >> 8) |
       (bytes4(call.data[2]) >> 16) |
       (bytes4(call.data[3]) >> 24);
-      require(_predicateData.allowedMethod == methodSignature, "Unallowed method");
+      require(_predicateData.allowedMethod == methodSignature, "Method is not allowed");
     }
   }
 
