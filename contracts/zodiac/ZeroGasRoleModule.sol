@@ -6,6 +6,10 @@ import "../OnChainWallet.sol";
 // 'Zero gas' means that owner does not need to spend gas to assign
 contract ZeroGasRoleModule is Module {
 
+  constructor(address _avatar){
+    avatar = _avatar;
+  }
+
   function setUp(bytes memory initParams) public override {
     (address _owner, address _avatar, address _target) = abi.decode(
       initParams,
@@ -18,9 +22,16 @@ contract ZeroGasRoleModule is Module {
     bytes memory permissionSignature
   ) public {
     //1. Check that owner has approved this call
-    //    checkSignatures(call, permission, permissionSignature);
+    checkSignatures(call, permission, permissionSignature);
 
     //2. Execute a transaction from safe
     exec(call.to, 0, call.data, Enum.Operation.Call);
+  }
+
+  function checkSignatures(OnChainWallet.Call memory call,
+    OnChainWallet.Permission memory permission,
+    bytes memory permissionSignature) public {
+
+    // Check predicate validity with library
   }
 }
