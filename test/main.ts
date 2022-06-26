@@ -1,7 +1,7 @@
 import {expect} from "chai";
 import {ethers} from "hardhat";
 import {SignerWithAddress} from "@nomiclabs/hardhat-ethers/signers";
-import {OnChainWallet, PredicateImplV1, SubKeyChecker, TestNFT} from "../typechain";
+import {OnChainWallet, PredicateImplV1, TestNFT} from "../typechain";
 
 describe("Subkeys", function () {
   let walletOwner: SignerWithAddress,
@@ -9,7 +9,6 @@ describe("Subkeys", function () {
     nftReceiver: SignerWithAddress,
     wrongThirdParty: SignerWithAddress;
 
-  let subKeyChecker: SubKeyChecker;
   let walletContract: OnChainWallet;
   let nftContract: TestNFT;
   let predicateContract: PredicateImplV1;
@@ -17,10 +16,6 @@ describe("Subkeys", function () {
   beforeEach(async () => {
     [walletOwner, thirdParty, nftReceiver, wrongThirdParty] =
       await ethers.getSigners();
-
-    const Lib = await ethers.getContractFactory("SubKeyChecker");
-    subKeyChecker = await Lib.deploy();
-    await subKeyChecker.deployed();
 
     walletContract = await deployWallet(walletOwner);
     nftContract = await deployNftContract(walletOwner);
@@ -42,18 +37,13 @@ describe("Subkeys", function () {
   }
 
   async function deployWallet(signer: SignerWithAddress) {
-    const walletFactory = await ethers.getContractFactory("OnChainWallet", {
-      libraries: {
-        SubKeyChecker: subKeyChecker.address,
-      },
-    });
+    const walletFactory = await ethers.getContractFactory("OnChainWallet");
     const walletContract = await walletFactory.connect(signer).deploy();
     await walletContract.deployed();
     return walletContract;
   }
 
   it("Create wallet and subkeys, grant permission, submit transaction", async function () {
-
 
     nftContract.connect(walletOwner).transferOwnership(walletContract.address);
 
@@ -77,7 +67,7 @@ describe("Subkeys", function () {
         [predicateParams.allowedAddress, predicateParams.allowedMethod]
       ),
     };
-    const messageHash = await subKeyChecker.getPermissionHash(permissionStruct);
+    const messageHash = await walletContract.getPermissionHash(permissionStruct);
     const messageHashBinary = ethers.utils.arrayify(messageHash);
     const messageSignature = await walletOwner.signMessage(messageHashBinary);
 
@@ -131,7 +121,7 @@ describe("Subkeys", function () {
         [predicateParams.allowedAddress, predicateParams.allowedMethod]
       ),
     };
-    const messageHash = await subKeyChecker.getPermissionHash(
+    const messageHash = await walletContract.getPermissionHash(
       permissionStruct
     );
     const messageHashBinary = ethers.utils.arrayify(messageHash);

@@ -16,7 +16,7 @@ contract PredicateImplV1 is Predicate {
     bytes4 allowedMethod;
   }
 
-  function check(OnChainWallet.Call memory call, bytes memory predicateParams) override external view {
+  function check(OnChainWallet.Call memory call, bytes memory predicateParams) override external pure {
     (PredicateData memory _predicateData) = abi.decode(predicateParams, (PredicateData));
     if (_predicateData.allowedAddress != address(0)) {
       require(_predicateData.allowedAddress == call.to, "Target address is not allowed");

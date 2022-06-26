@@ -2,7 +2,6 @@ pragma solidity ^0.8.4;
 
 import "@gnosis.pm/zodiac/contracts/core/Module.sol";
 import "../OnChainWallet.sol";
-import "../SubKeyChecker.sol";
 
 // 'Zero gas' means that owner does not need to spend gas to assign
 contract ZeroGasRoleModule is Module {
@@ -11,7 +10,7 @@ contract ZeroGasRoleModule is Module {
     avatar = _avatar;
   }
 
-  function setUp(bytes memory initParams) public override {
+  function setUp(bytes memory initParams) public override pure {
     (address _owner, address _avatar, address _target) = abi.decode(
       initParams,
       (address, address, address)
@@ -19,7 +18,7 @@ contract ZeroGasRoleModule is Module {
   }
 
   function execute(OnChainWallet.Call memory call,
-    SubKeyChecker.Permission memory permission,
+    OnChainWallet.Permission memory permission,
     bytes memory permissionSignature
   ) public {
     //1. Check that owner has approved this call
@@ -30,7 +29,7 @@ contract ZeroGasRoleModule is Module {
   }
 
   function checkSignatures(OnChainWallet.Call memory call,
-    SubKeyChecker.Permission memory permission,
+    OnChainWallet.Permission memory permission,
     bytes memory permissionSignature) public {
 
     // Check predicate validity with library
