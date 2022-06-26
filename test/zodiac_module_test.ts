@@ -2,7 +2,7 @@ import { expect } from "chai";
 import { ethers } from "hardhat";
 import {
   PredicateImplV1,
-  SubkeysWallet,
+  SubKeyVault,
   TestAvatar,
   TestNFT,
   ZeroGasRoleModule,

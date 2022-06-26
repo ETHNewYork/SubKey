@@ -1,6 +1,6 @@
-# SubKeys
+# SubKey
 
-# SubKeys - keys issued by main account keys that can only submit transaction allowed by Permissions.
+SubKey enables issuing keys with limited permissions.
 
 # How to use
 
