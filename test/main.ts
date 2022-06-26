@@ -1,7 +1,7 @@
-import { expect } from "chai";
-import { ethers } from "hardhat";
-import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
-import { PredicateImplV1, SubkeysWallet, TestNFT } from "../typechain";
+import {expect} from "chai";
+import {ethers} from "hardhat";
+import {SignerWithAddress} from "@nomiclabs/hardhat-ethers/signers";
+import {PredicateImplV1, SubkeysWallet, TestNFT} from "../typechain";
 
 describe("SubkeysWallet", function () {
   let walletOwner: SignerWithAddress,
@@ -35,16 +35,15 @@ describe("SubkeysWallet", function () {
     );
 
     // 3. prepare NFT mint call
-    const mintCallData = createMintCallData();
-    const call = {
+    const mintCall = {
       to: nftContract.address,
-      data: mintCallData,
+      data: createMintMethodCallData(),
     };
 
     // 4. send NFT mint call from 3rdparty wallet
     await walletContract
       .connect(thirdParty)
-      .execute(call, permissionToMint, messageSignature);
+      .execute(mintCall, permissionToMint, messageSignature);
 
     // 5. confirm a transaction successfully completed
     expect(await nftContract.ownerOf(1)).to.be.equal(nftReceiver.address);
@@ -52,7 +51,7 @@ describe("SubkeysWallet", function () {
     // 6. send same request from a different user and confirm transaction fails
     const t = walletContract
       .connect(wrongThirdParty)
-      .execute(call, permissionToMint, messageSignature);
+      .execute(mintCall, permissionToMint, messageSignature);
     expect(t).to.be.revertedWith("Wrong transaction sender");
   });
 
@@ -61,10 +60,6 @@ describe("SubkeysWallet", function () {
     const abi2 = ["function setBaseURI(string memory _newBaseURI)"];
     const iface1 = new ethers.utils.Interface(abi1);
     const iface2 = new ethers.utils.Interface(abi2);
-
-    const setBaseURICallData = iface2.encodeFunctionData("setBaseURI", [
-      "ipfs://newAddress",
-    ]);
 
     // Allow safeMint function
     const permissionStruct = {
@@ -84,7 +79,9 @@ describe("SubkeysWallet", function () {
     // Call setBaseURI function
     const callStruct = {
       to: nftContract.address,
-      data: setBaseURICallData,
+      data: iface2.encodeFunctionData("setBaseURI", [
+        "ipfs://newAddress",
+      ]),
     };
     const t = walletContract
       .connect(thirdParty)
@@ -114,7 +111,7 @@ describe("SubkeysWallet", function () {
     return walletContract;
   }
 
-  function createMintCallData() {
+  function createMintMethodCallData() {
     const abi = ["function safeMint(address to, uint256 tokenId)"];
     const iface = new ethers.utils.Interface(abi);
     return iface.encodeFunctionData("safeMint", [nftReceiver.address, 1]);
