@@ -16,16 +16,28 @@ Currently the Predicate that checks the caller address and the target contract f
 - expiration time
 - revoking permissions
 
-# Deploy
+# Install
 
 ```
-npx hardhat run scripts/deploy.ts 
+git clone https://github.com/DeFiMiami/subkey.git
+cd subkey
+npm i
+mv .env.example .env
 ```
+
+Put the appropriate values into the `.env` file.
+
 
 # Run Tests
 
 ```
 npx hardhat test
+```
+
+# Deploy
+
+```
+npx hardhat run --network <network name> scripts/deploy.ts
 ```
 
 # Ideas for future improvements
