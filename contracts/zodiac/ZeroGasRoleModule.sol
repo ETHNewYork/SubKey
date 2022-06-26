@@ -21,17 +21,46 @@ contract ZeroGasRoleModule is Module {
     SubkeysWallet.Permission memory permission,
     bytes memory permissionSignature
   ) public {
-    //1. Check that owner has approved this call
-    checkSignatures(call, permission, permissionSignature);
+    //1. Check that Permission was signed by the owner => we trust the Permission data
+    checkSignatureValid(owner(), getPermissionHash(permission), permissionSignature);
 
-    //2. Execute a transaction from safe
+    //2. Check that caller is the same as approved by the Permission
+    require(permission.caller == msg.sender, "Wrong transaction sender");
+
+    //3. Check that Predicate(transaction)=true => we trust transaction
+    permission.predicate.check(call, permission.predicateParams);
+
+    //4. Execute trusted transaction
     exec(call.to, 0, call.data, Enum.Operation.Call);
   }
 
-  function checkSignatures(SubkeysWallet.Call memory call,
-    SubkeysWallet.Permission memory permission,
-    bytes memory permissionSignature) public {
+  function getPermissionHash(SubkeysWallet.Permission memory permission) public pure returns (bytes32){
+    return keccak256(
+      abi.encode(
+        permission.caller
+      )
+    );
+  }
 
-    // Check predicate validity with library
+  function checkSignatureValid(address signer, bytes32 hash, bytes memory signature) private pure {
+    bytes32 etherHash = getHashEthereum(bytes32ToString(hash));
+    (address recovered, ECDSA.RecoverError error) = ECDSA.tryRecover(etherHash, signature);
+    require(signer == recovered, "Invalid signature");
+  }
+
+  function getHashEthereum(string memory hash) private pure returns (bytes32){
+    return keccak256(abi.encodePacked("\x19Ethereum Signed Message:\n32", hash));
+  }
+
+  function bytes32ToString(bytes32 _bytes32) private pure returns (string memory) {
+    uint8 i = 0;
+    while (i < 32 && _bytes32[i] != 0) {
+      i++;
+    }
+    bytes memory bytesArray = new bytes(i);
+    for (i = 0; i < 32 && _bytes32[i] != 0; i++) {
+      bytesArray[i] = _bytes32[i];
+    }
+    return string(bytesArray);
   }
 }
