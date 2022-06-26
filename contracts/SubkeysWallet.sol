@@ -21,8 +21,9 @@ contract SubkeysWallet is Ownable {
     bytes predicateParams;
   }
 
-  function execute(Call memory call,
-    Permission memory permission, // created by owner
+  function execute(
+    Call memory call,                // created by 3rdparty (subkey)
+    Permission memory permission,    // created by owner
     bytes memory permissionSignature // created by owner
   ) public {
     if (msg.sender != owner()) {
