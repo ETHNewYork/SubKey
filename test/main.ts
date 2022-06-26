@@ -18,30 +18,34 @@ describe("SubkeysWallet", function () {
     [walletOwner, thirdParty, nftReceiver, wrongThirdParty] =
       await ethers.getSigners();
 
-    walletContract = await deployContract(walletOwner, "SubkeysWallet");
-    nftContract = await deployContract(walletOwner, "TestNFT");
+    // deploy predicate (one per chain)
     predicateContract = await deployContract(walletOwner, "PredicateImplV1");
 
+    // deploy wallet (one per user)
+    walletContract = await deployContract(walletOwner, "SubkeysWallet");
+
+    // create NFT collection and transfer to wallet
+    nftContract = await deployContract(walletOwner, "TestNFT");
     nftContract.connect(walletOwner).transferOwnership(walletContract.address);
   });
 
   it("Create permission, sign permission, submit a transaction allowed by permission", async function () {
-    // 1. create permission for thirdParty to mint NFT
+    // 1. create permission for thirdParty to mint NFT (off chain)
     const permissionToMint = createPermissionToMint(thirdParty.address);
 
-    // 2. sign permission with the owner keys
+    // 2. sign permission with the owner keys (off chain)
     const messageSignature = await signPermission(
       walletOwner,
       permissionToMint
     );
 
-    // 3. prepare NFT mint call
+    // 3. prepare NFT mint call (off chain)
     const mintCall = {
       to: nftContract.address,
       data: createMintMethodCallData(),
     };
 
-    // 4. send NFT mint call from 3rdparty wallet
+    // 4. send NFT mint call from 3rdparty wallet (on chain)
     await walletContract
       .connect(thirdParty)
       .execute(mintCall, permissionToMint, messageSignature);
