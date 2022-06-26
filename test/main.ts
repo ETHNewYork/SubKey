@@ -1,15 +1,15 @@
 import {expect} from "chai";
 import {ethers} from "hardhat";
 import {SignerWithAddress} from "@nomiclabs/hardhat-ethers/signers";
-import {SubKey, PredicateImplV1, TestNFT} from "../typechain";
+import {SubkeysWallet, PredicateImplV1, TestNFT} from "../typechain";
 
-describe("Subkeys", function () {
+describe("SubkeysWallet", function () {
   let walletOwner: SignerWithAddress,
     thirdParty: SignerWithAddress,
     nftReceiver: SignerWithAddress,
     wrongThirdParty: SignerWithAddress;
 
-  let walletContract: SubKey;
+  let walletContract: SubkeysWallet;
   let nftContract: TestNFT;
   let predicateContract: PredicateImplV1;
 
@@ -37,13 +37,13 @@ describe("Subkeys", function () {
   }
 
   async function deployWallet(signer: SignerWithAddress) {
-    const walletFactory = await ethers.getContractFactory("SubKey");
+    const walletFactory = await ethers.getContractFactory("SubkeysWallet");
     const walletContract = await walletFactory.connect(signer).deploy();
     await walletContract.deployed();
     return walletContract;
   }
 
-  it("Create wallet and subkeys, grant permission, submit transaction", async function () {
+  it("Create wallet and a subkey, grant permission, submit transaction", async function () {
 
     nftContract.connect(walletOwner).transferOwnership(walletContract.address);
 

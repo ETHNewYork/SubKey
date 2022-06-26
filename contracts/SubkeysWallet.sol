@@ -8,8 +8,7 @@ import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import "@openzeppelin/contracts/utils/cryptography/SignatureChecker.sol";
 import "./Predicate.sol";
 
-
-contract SubKey is Ownable {
+contract SubkeysWallet is Ownable {
 
   struct Call {
     address to;
