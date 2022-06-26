@@ -55,7 +55,7 @@ contract SubkeysWallet is Ownable {
   function getPermissionHash(Permission memory permission) public pure returns (bytes32){
     return keccak256(
       abi.encode(
-        permission.caller
+        permission.caller  // TODO hash from all permission fields
       )
     );
   }

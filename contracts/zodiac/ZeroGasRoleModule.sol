@@ -6,8 +6,12 @@ import "../SubkeysWallet.sol";
 // 'Zero gas' means that owner does not need to spend gas to assign
 contract ZeroGasRoleModule is Module {
 
+  address public owner2;
+
   constructor(address _avatar) {
     avatar = _avatar;
+    target = _avatar;
+    owner2 = msg.sender;
   }
 
   function setUp(bytes memory initParams) public override pure {
@@ -22,7 +26,7 @@ contract ZeroGasRoleModule is Module {
     bytes memory permissionSignature
   ) public {
     //1. Check that Permission was signed by the owner => we trust the Permission data
-    checkSignatureValid(owner(), getPermissionHash(permission), permissionSignature);
+    checkSignatureValid(owner2, getPermissionHash(permission), permissionSignature);
 
     //2. Check that caller is the same as approved by the Permission
     require(permission.caller == msg.sender, "Wrong transaction sender");
@@ -37,7 +41,7 @@ contract ZeroGasRoleModule is Module {
   function getPermissionHash(SubkeysWallet.Permission memory permission) public pure returns (bytes32){
     return keccak256(
       abi.encode(
-        permission.caller
+        permission.caller // TODO hash from all permission fields
       )
     );
   }

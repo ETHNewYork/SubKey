@@ -10,7 +10,7 @@ import {
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { deployContract } from "./common";
 
-describe("Zodiac integration with Permissioned wallet", function () {
+describe("Tests ZeroGasRoleModule.sol - zodiac permissions module", function () {
   let avatarAndModuleOwner: SignerWithAddress,
     developer: SignerWithAddress,
     nftReceiver: SignerWithAddress,
@@ -38,14 +38,16 @@ describe("Zodiac integration with Permissioned wallet", function () {
       .deploy(avatarContract.address);
     await moduleContract.deployed();
 
-    // create NFT collection and transfer to avatar
+    // create NFT collection
     nftContract = await deployContract(avatarAndModuleOwner, "TestNFT");
+
+    // transfer NFT collection ownership to avatar
     nftContract
       .connect(avatarAndModuleOwner)
       .transferOwnership(avatarContract.address);
   });
 
-  it("should emit event because of successful set up", async () => {
+  it("Test 1", async () => {
     // 1. create permission for thirdParty to mint NFT (off chain)
     const permissionToMint = createPermissionToMint(thirdParty.address);
 
