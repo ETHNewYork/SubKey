@@ -40,9 +40,6 @@ contract ZeroGasRoleModule is Module {
   function checkSignatureValid(address signer, bytes32 hash, bytes memory signature) private view {
     bytes32 etherHash = getHashEthereum(bytes32ToString(hash));
     (address recovered, ECDSA.RecoverError error) = ECDSA.tryRecover(etherHash, signature);
-    console.log("++++");
-    console.log(signer);
-    console.log(recovered);
     require(signer == recovered, "Invalid signature");
   }
 
